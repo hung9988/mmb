@@ -1,7 +1,11 @@
 <script setup lang="ts">
 const supabase = useSupabaseClient();
 const user = useSupabaseUser();
-
+() => {
+if (user.value) {
+      return navigateTo("/login");
+    }
+  }
 async function handleSignOut() {
   await supabase.auth.signOut();
 
@@ -11,7 +15,7 @@ async function handleSignOut() {
 
 <template>
   <UContainer class="text-center">
-    <h1>hi, {{ user?.email }}</h1>
+    <h1>hi, {{ user?.value }}</h1>
 
     <UButton @click="handleSignOut">Logout</UButton>
   </UContainer>
