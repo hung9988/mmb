@@ -11,6 +11,6 @@ watch(
 );
 </script>
 <template>
- <div> <a> asddasdd</a></div>
+ <div> <a> Lorem Ipsum </a></div>
 </template>
   
