@@ -1,39 +1,73 @@
-<script setup>
-const colorMode = useColorMode()
-const supabase = useSupabaseClient();
-const user = useSupabaseUser();
+<script setup lang="ts">
+import type { Database } from "@/types/supabase";
 
-const toggled = computed({
-  get () {
-    return colorMode.value === 'dark'
+const supabase = useSupabaseClient<Database>();
+
+const page = ref(1);
+
+const { data: res, pending } = useAsyncData(
+  async () => {
+    const { data, count } = await supabase
+      .from("activities")
+      .select("*", { count: "exact" })
+      .range((page.value - 1) * 7, page.value * 7)
+      .order("start_time", { ascending: true });
+
+    return { data, count };
   },
-  set () {
-    colorMode.preference = colorMode.value === 'dark' ? 'light' : 'dark'
+  {
+    watch: [page],
   }
-})
+);
 
-
-const userLogout = async () => {
-  await supabase.auth.signOut();
+const card = {
+  body: {
+    base: "h-full",
+    padding: "p-0 sm:p-0",
+  },
 };
-watchEffect(() => {
-  if (!user.value) {
-    return navigateTo('/login');
-  }
-});
+
 definePageMeta({
-  middleware: 'auth',
+  middleware: "auth",
 });
 </script>
 
 <template>
-  
-<main class="w-screen h-screen flex items-center justify-center ">
-  <UCard class="w-auto h-auto flex items-center justify-center ">
-   <div class="pb-10"> hello, {{ user?.email }} </div>
+  <UContainer class="mt-12 space-y-12">
+    <div v-if="pending" class="grid grid-cols-4 gap-6">
+      <UCard v-for="_ in Array(8).fill(0)" :ui="card" class="max-h-72">
+        <template #header>
+          <USkeleton class="h-3 w-full" />
+          <USkeleton class="h-3 w-full mt-2" />
+        </template>
 
-  <UButton block @click="userLogout">Log out</UButton>
+        <USkeleton class="h-48 w-full" />
+      </UCard>
+    </div>
 
-</UCard>
-</main>
+    <div v-else class="grid grid-cols-4 gap-6">
+      <UCard v-for="row in res?.data" :ui="card" class="max-h-72">
+        <template #header>
+          {{ row.name }}
+          <br />
+          {{ row.start_time }}
+        </template>
+
+        <img
+          v-if="row.image"
+          class="h-full w-auto object-cover"
+          :src="row.image"
+        />
+      </UCard>
+    </div>
+
+    <div class="flex justify-center">
+      <UPagination
+        v-if="res?.count"
+        v-model="page"
+        :page-count="8"
+        :total="res.count"
+      />
+    </div>
+  </UContainer>
 </template>

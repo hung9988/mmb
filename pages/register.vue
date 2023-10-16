@@ -1,77 +1,80 @@
-<script setup>
+<script setup lang="ts">
+import { z } from "zod";
+import type { FormSubmitEvent } from "@nuxt/ui/dist/runtime/types";
+
 const toast = useToast();
+
+const schema = z.object({
+  email: z.string().email("Invalid email"),
+  password: z.string().min(8, "Must be at least 8 characters"),
+  passwordConfirm: z.string().min(8, "Must be at least 8 characters"),
+});
+
+type Schema = z.output<typeof schema>;
+
 const pending = ref(false);
 
-const user = useSupabaseUser();
-const email = ref('');
-const password = ref('');
-const confirmPassword = ref('');
-const errorMsg = ref('');
+const state = ref({
+  email: "",
+  password: "",
+  passwordConfirm: "",
+});
+
 const supabase = useSupabaseClient();
-const userRegister = async () => {
-  if (password.value !== confirmPassword.value) {
-    errorMsg.value = 'Passwords do not match!';
-    password.value = '';
-    confirmPassword.value = '';
-    setTimeout(() => {
-      errorMsg.value = '';
-    }, 3000);
-    return;
-  }
+
+async function submit(event: FormSubmitEvent<Schema>) {
+  pending.value = true;
   try {
     const { error } = await supabase.auth.signUp({
-      email: email.value,
-      password: password.value,
+      email: event.data.email,
+      password: event.data.password,
     });
-    email.value = '';
-    password.value = '';
-    confirmPassword.value = '';
+
     if (error) throw error;
+
+    return navigateTo("/");
   } catch (error) {
-    toast.add({ title: "Error!", description: error });
+    if (typeof error === "string") {
+      toast.add({ title: "Error!", description: error });
+    }
   } finally {
     toast.add({ title: "Successful!", description: "Check your email" });
     pending.value = false;
   }
-};
-
-watchEffect(() => {
-  if (user.value) {
-    return navigateTo('/');
-  }
-});
+}
 </script>
 
 <template>
-  <main class="w-screen h-screen flex items-center justify-center ">
-    <UCard class=" w-1/4 h-auto">
-      <form class="space-y-3 items-center justify-center pb-10" @submit.prevent="userRegister">
-      
+  <div class="h-full flex items-center justify-center">
+    <UCard class="w-1/4 h-auto">
+      <UForm
+        :schema="schema"
+        :state="state"
+        @submit="submit"
+        class="space-y-3 items-center justify-center"
+      >
         <UFormGroup label="Email" name="email" size="xl">
-          <UInput
-            v-model="email"
-            placeholder="you@example.com"
-            icon="i-heroicons-envelope"
-          />
-        </UFormGroup>
-        <UFormGroup class ="" label="Password" name="password" size="xl">
-          <UInput
-            v-model="password"
-          />
+          <UInput v-model="state.email" placeholder="you@example.com" />
         </UFormGroup>
 
-        <UFormGroup class ="pb-10" label="Confirm password" name="re_enter" size="xl">
-          <UInput
-            v-model="confirmPassword"
-          />
+        <UFormGroup label="Password" name="password" size="xl">
+          <UInput v-model="state.password" type="password" />
         </UFormGroup>
 
-        <UButton size="xl" block color="primary" :loading="pending" type="submit">Sign up</UButton>
-      </form>
+        <UFormGroup label="Confirm password" name="passwordConfirm" size="xl">
+          <UInput v-model="state.passwordConfirm" type="password" />
+        </UFormGroup>
 
-      
+        <UButton
+          size="xl"
+          block
+          color="primary"
+          :loading="pending"
+          type="submit"
+        >
+          Sign up
+        </UButton>
+      </UForm>
     </UCard>
-  </main>
-
-  
+  </div>
 </template>
