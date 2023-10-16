@@ -17,12 +17,19 @@ const { data: res, pending } = useAsyncData(
   },
   {
     watch: [page],
+    transform: (res) => ({
+      ...res,
+      data: res.data?.map((data) => ({
+        ...data,
+        start_time: data.start_time ? new Date(data.start_time) : null,
+        finish_time: data.finish_time ? new Date(data.finish_time) : null,
+      })),
+    }),
   }
 );
 
 const card = {
   body: {
-    base: "h-full",
     padding: "p-0 sm:p-0",
   },
 };
@@ -46,18 +53,23 @@ definePageMeta({
     </div>
 
     <div v-else class="grid grid-cols-4 gap-6">
-      <UCard v-for="row in res?.data" :ui="card" class="max-h-72">
+      <UCard v-for="row in res?.data" :ui="card" class="">
         <template #header>
           {{ row.name }}
-          <br />
-          {{ row.start_time }}
         </template>
 
-        <img
-          v-if="row.image"
-          class="h-full w-auto object-cover"
-          :src="row.image"
-        />
+        <img v-if="row.image" class="w-auto object-cover" :src="row.image" />
+
+        <template #footer>
+          {{
+            row.start_time?.toLocaleDateString("vi-VN", {
+              weekday: "long",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })
+          }}
+        </template>
       </UCard>
     </div>
 
