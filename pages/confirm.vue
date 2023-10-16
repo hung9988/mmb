@@ -10,7 +10,7 @@ watch(
   { immediate: true }
 );
 </script>
-
 <template>
-  <div>Waiting for login...</div>
+ <div> <a> Lorem Ipsum </a></div>
 </template>
+  

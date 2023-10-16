@@ -1,7 +1,7 @@
 <template>
-  <div class="min-w-[100vw] min-h-[100vh]">
+  <NuxtLayout class="bg-gray-50 dark:bg-gray-900">
     <NuxtPage />
-  </div>
+  </NuxtLayout>
 
   <UNotifications />
 </template>
