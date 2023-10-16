@@ -38,7 +38,10 @@ async function submit(event: FormSubmitEvent<Schema>) {
       toast.add({ title: "Error!", description: error });
     }
   } finally {
-    toast.add({ title: "Successful!", description: "Check your email" });
+    toast.add({
+      title: "Successful!",
+      description: "You are signed up and logged in!",
+    });
     pending.value = false;
   }
 }

@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import type { Database } from "@/types/supabase";
-
+const isOpen = ref(false);
 const supabase = useSupabaseClient<Database>();
 
 const page = ref(1);
+const goToWebsite = (url) => {
+  window.open(url);
+};
 
 const { data: res, pending } = useAsyncData(
   async () => {
@@ -11,10 +14,11 @@ const { data: res, pending } = useAsyncData(
       .from("activities")
       .select("*", { count: "exact" })
       .range((page.value - 1) * 7, page.value * 7)
-      .order("start_time", { ascending: true });
+      .order("start_time", { ascending: false });
 
     return { data, count };
   },
+
   {
     watch: [page],
     transform: (res) => ({
@@ -61,14 +65,38 @@ definePageMeta({
         <img v-if="row.image" class="w-auto object-cover" :src="row.image" />
 
         <template #footer>
-          {{
-            row.start_time?.toLocaleDateString("vi-VN", {
-              weekday: "long",
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })
-          }}
+          <div class="flex justify-center pb-10">
+            Ngày bắt đầu:
+            {{
+              row.start_time?.toLocaleDateString("vi-VN", {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })
+            }}
+          </div>
+
+          <div class="flex justify-center pb-10">
+            Ngày kết thúc:
+            {{
+              row.finish_time?.toLocaleDateString("vi-VN", {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })
+            }}
+          </div>
+
+          <div class="flex justify-center">
+            <UButton
+              label="See details"
+              @click="goToWebsite(row.detail)"
+              target="blank"
+            >
+            </UButton>
+          </div>
         </template>
       </UCard>
     </div>

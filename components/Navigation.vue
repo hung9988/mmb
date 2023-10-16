@@ -26,9 +26,10 @@ async function signOut() {
 
 <template>
   <div class="flex flex-col h-full justify-between p-6">
-    <UVerticalNavigation :links="links" />
-
-    <div>
+    <div class="flex justify-center">
+      <div class="w-full justify-center">
+        <UVerticalNavigation :links="links" />
+      </div>
       <UButton
         :icon="
           isDark ? 'i-heroicons-moon-20-solid' : 'i-heroicons-sun-20-solid'
@@ -38,7 +39,9 @@ async function signOut() {
         aria-label="Theme"
         @click="isDark = !isDark"
       />
+    </div>
 
+    <div class="">
       <UButton v-if="user" @click="signOut" block>Sign out</UButton>
       <UButton v-else to="/login" block>Sign in</UButton>
     </div>
