@@ -52,7 +52,9 @@ watchEffect(() => {
           />
         </UFormGroup>
 
-        <UButton size="xl" block color="primary" :loading="pending" type="submit">Sign in</UButton>
+        <div class="flex justify-center">
+  <UButton size="xl" block color="primary" :loading="pending" type="submit" class="w-1/2">Sign in</UButton>
+</div>
       </form>
 
       <UCard class="flex items-center justify-center">
